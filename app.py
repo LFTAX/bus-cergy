@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"  # <-- TA CLE ICI
-STOP_ID = "STIVOFR:25614"               # L'ID trouvé (Cité Artisanale)
+STOP_ID = "STIVOFR:23904"               # L'ID trouvé (Cité Artisanale)
 
 @app.route('/')
 def home():
