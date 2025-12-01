@@ -8,28 +8,36 @@ import os
 app = Flask(__name__)
 
 # --- TES INFOS ---
-TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"  # <-- REMETS TA CLE ICI !
-STOP_ID = "STIVOFR:32126"               # TON ID ARRET
-LIGNES_VOULUES = ["1242", "1224"]       # TES LIGNES
+TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"  # <-- REMETS TA VRAIE CLÉ ICI
+STOP_ID = "STIVOFR:32126"               # Ton ID d'arrêt
+LIGNES_VOULUES = ["1242", "1224"]       # Tes lignes
 
 @app.route('/')
 def home():
-    return "Serveur Render Bus Actif !"
+    return "Serveur Bus Actif !"
 
 @app.route('/bus-matin')
 def get_bus_schedule():
     tz_paris = pytz.timezone('Europe/Paris')
     now = datetime.datetime.now(tz_paris)
     
-    # --- REGLAGE HORAIRE ---
+    # --- REGLAGE TEMPORAIRE POUR TESTER CE SOIR ---
     HEURE_DEBUT = 7
-    HEURE_FIN = 20
+    HEURE_FIN = 23  # On laisse allumé jusqu'à 23h pour tester
 
-    # Note: Sur Render, pour tester le soir, change HEURE_FIN à 23 temporairement
+    # LOGIQUE : Si on n'est pas dans les horaires
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
-         # Affiche l'heure vue par le serveur pour comprendre pourquoi il bloque
-heure_actuelle = now.strftime("%Hh%M")
-return jsonify({"frames": [{"text": f"Dodo {heure_actuelle}", "icon": "a236", "index": 0}]})
+        # C'est ici que l'erreur d'indentation se trouvait
+        heure_actuelle = now.strftime("%Hh%M")
+        return jsonify({
+            "frames": [
+                {
+                    "text": f"Dodo {heure_actuelle}", 
+                    "icon": "a236", 
+                    "index": 0
+                }
+            ]
+        })
 
     try:
         url = "https://external.transitapp.com/v3/public/stop_departures"
@@ -71,6 +79,5 @@ return jsonify({"frames": [{"text": f"Dodo {heure_actuelle}", "icon": "a236", "i
         return jsonify({"frames": [{"text": "Err", "icon": "i93", "index": 0}]})
 
 if __name__ == '__main__':
-    # Cette partie sert pour tester sur ton PC, Render utilise gunicorn
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
