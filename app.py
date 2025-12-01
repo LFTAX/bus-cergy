@@ -27,7 +27,9 @@ def get_bus_schedule():
 
     # Note: Sur Render, pour tester le soir, change HEURE_FIN à 23 temporairement
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
-         return jsonify({"frames": [{"text": " ", "icon": "a236", "index": 0}]})
+         # Affiche l'heure vue par le serveur pour comprendre pourquoi il bloque
+heure_actuelle = now.strftime("%Hh%M")
+return jsonify({"frames": [{"text": f"Dodo {heure_actuelle}", "icon": "a236", "index": 0}]})
 
     try:
         url = "https://external.transitapp.com/v3/public/stop_departures"
