@@ -9,22 +9,25 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"
-STOP_ID = "STIVOFR:23904"        # L'ID confirmé (Cité Artisanale vers Préfecture)
-LIGNES_VOULUES = ["1242", "1224"] # SEULS ces bus passeront
+STOP_ID = "STIVOFR:23904"        # L'ID confirmé (Cité Artisanale -> Préfecture)
+LIGNES_VOULUES = ["1242", "1224"] 
 
 @app.route('/')
 def home():
-    return "Serveur Bus Actif"
+    return "Serveur Bus Optimisé (Filtre > 10min)"
 
 @app.route('/bus-matin')
 def get_bus_schedule():
     tz_paris = pytz.timezone('Europe/Paris')
     now = datetime.datetime.now(tz_paris)
     
-    # --- FILTRE HORAIRE ---
+    # --- HORAIRES DU MATIN ---
+    # Réglé pour demain matin (7h00 - 9h00)
+    # Si tu veux tester maintenant, mets HEURE_FIN = 23
     HEURE_DEBUT = 7
-    HEURE_FIN = 9 # Change à 23 juste pour tester ce soir si tu veux
+    HEURE_FIN = 22 
 
+    # Hors horaires : écran vide pour dormir
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
          return jsonify({"frames": [{"text": " ", "icon": "a236", "index": 0}]})
 
@@ -36,39 +39,59 @@ def get_bus_schedule():
         response = requests.get(url, headers=headers, params=params)
         data = response.json()
         
-        prochains_bus = []
+        bus_trouves = []
         current_time = time.time()
 
         if 'route_departures' in data:
             for route in data['route_departures']:
                 nom_ligne = str(route.get('route_short_name', 'Inconnu'))
                 
-                # --- LE FILTRE IMPITOYABLE ---
-                # Si le bus n'est pas dans la liste, on l'ignore DIRECTEMENT
+                # On filtre tes lignes
                 if nom_ligne in LIGNES_VOULUES:
-                    
                     for depart in route['itineraries'][0]['schedule_items']:
                         ts_depart = depart['departure_time']
                         diff_seconds = ts_depart - current_time
                         minutes = int(diff_seconds / 60)
                         
-                        if minutes >= 0:
-                            prochains_bus.append({'ligne': nom_ligne, 'min': minutes})
+                        # --- LE FILTRE "MARCHE A PIED" ---
+                        # On ne garde que les bus qui sont à au moins 10 min
+                        if minutes >= 10:
+                            bus_trouves.append({'ligne': nom_ligne, 'min': minutes})
 
-        prochains_bus.sort(key=lambda x: x['min'])
+        # On trie pour afficher le prochain bus "prenable"
+        bus_trouves.sort(key=lambda x: x['min'])
 
-        if len(prochains_bus) > 0:
-            premier = prochains_bus[0]
-            texte = f"{premier['ligne']}: {premier['min']}m"
-            icone = "i2766"
+        # --- CONSTRUCTION DE L'AFFICHAGE ---
+        frames = []
+
+        if len(bus_trouves) > 0:
+            # On prend les 2 prochains bus maximum
+            prochains = bus_trouves[:2]
+            
+            idx = 0
+            for bus in prochains:
+                # ÉCRAN A : Numéro (Fixe)
+                frames.append({
+                    "text": bus['ligne'],
+                    "icon": "i2766", # Icône Bus
+                    "index": idx
+                })
+                idx += 1
+                
+                # ÉCRAN B : Temps (Fixe)
+                frames.append({
+                    "text": f"{bus['min']} min",
+                    "icon": "a236", # Icône Horloge
+                    "index": idx
+                })
+                idx += 1
         else:
-            # Si le filtre marche mais qu'aucun 1242 n'est là
-            texte = "Pas de bus"
-            icone = "a236"
+            # Si aucun bus n'est > 10 min (ou s'il n'y en a pas du tout)
+            frames.append({"text": "Pas de bus", "icon": "a236", "index": 0})
 
-        return jsonify({"frames": [{"text": texte, "icon": icone, "index": 0}]})
+        return jsonify({"frames": frames})
 
-    except Exception:
+    except Exception as e:
         return jsonify({"frames": [{"text": "Err", "icon": "i93", "index": 0}]})
 
 if __name__ == '__main__':
