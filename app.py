@@ -23,7 +23,7 @@ def get_bus_schedule():
     
     # --- REGLAGE HORAIRE ---
     HEURE_DEBUT = 7
-    HEURE_FIN = 9
+    HEURE_FIN = 20
 
     # Note: Sur Render, pour tester le soir, change HEURE_FIN à 23 temporairement
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
