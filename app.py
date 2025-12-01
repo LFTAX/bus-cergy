@@ -54,12 +54,15 @@ def get_bus_schedule():
             for route in data['route_departures']:
                 nom_ligne = route.get('route_short_name', '')
                 
-                if nom_ligne in LIGNES_VOULUES:
-                    for depart in route['itineraries'][0]['schedule_items']:
-                        ts_depart = depart['departure_time']
-                        diff_seconds = ts_depart - current_time
-                        minutes = int(diff_seconds / 60)
-                        
+              # ON ACCEPTE TOUS LES BUS POUR TESTER
+                # if nom_ligne in LIGNES_VOULUES:  <-- On commente cette ligne
+                for depart in route['itineraries'][0]['schedule_items']:
+                    ts_depart = depart['departure_time']
+                    diff_seconds = ts_depart - current_time
+                    minutes = int(diff_seconds / 60)
+                    
+                    if minutes >= 0:
+                        prochains_bus.append({'ligne': nom_ligne, 'min': minutes})
                         if minutes >= 0:
                             prochains_bus.append({'ligne': nom_ligne, 'min': minutes})
 
