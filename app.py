@@ -8,27 +8,27 @@ import os
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"  # <-- TA CLE ICI
-STOP_ID = "STIVOFR:23904"               # L'ID trouvé (Cité Artisanale)
+TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"
+STOP_ID = "STIVOFR:23904"        # L'ID confirmé (Cité Artisanale vers Préfecture)
+LIGNES_VOULUES = ["1242", "1224"] # SEULS ces bus passeront
 
 @app.route('/')
 def home():
-    return "Mode Espion Activé"
+    return "Serveur Bus Actif"
 
 @app.route('/bus-matin')
 def get_bus_schedule():
     tz_paris = pytz.timezone('Europe/Paris')
     now = datetime.datetime.now(tz_paris)
     
-    # Mode Test : Actif 24h/24
-    HEURE_DEBUT = 0
-    HEURE_FIN = 24
+    # --- FILTRE HORAIRE ---
+    HEURE_DEBUT = 7
+    HEURE_FIN = 21 # Change à 23 juste pour tester ce soir si tu veux
 
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
-        return jsonify({"frames": [{"text": " ", "icon": "a236", "index": 0}]})
+         return jsonify({"frames": [{"text": " ", "icon": "a236", "index": 0}]})
 
     try:
-        # ATTENTION : Les lignes ci-dessous DOIVENT être décalées
         url = "https://external.transitapp.com/v3/public/stop_departures"
         headers = {'apiKey': TRANSIT_API_KEY}
         params = {'global_stop_id': STOP_ID}
@@ -41,34 +41,34 @@ def get_bus_schedule():
 
         if 'route_departures' in data:
             for route in data['route_departures']:
-                # On récupère le nom de la ligne
                 nom_ligne = str(route.get('route_short_name', 'Inconnu'))
                 
-                # Pas de filtre ici, on prend tout
-                for depart in route['itineraries'][0]['schedule_items']:
-                    ts_depart = depart['departure_time']
-                    diff_seconds = ts_depart - current_time
-                    minutes = int(diff_seconds / 60)
+                # --- LE FILTRE IMPITOYABLE ---
+                # Si le bus n'est pas dans la liste, on l'ignore DIRECTEMENT
+                if nom_ligne in LIGNES_VOULUES:
                     
-                    if minutes >= 0:
-                        prochains_bus.append({'ligne': nom_ligne, 'min': minutes})
+                    for depart in route['itineraries'][0]['schedule_items']:
+                        ts_depart = depart['departure_time']
+                        diff_seconds = ts_depart - current_time
+                        minutes = int(diff_seconds / 60)
+                        
+                        if minutes >= 0:
+                            prochains_bus.append({'ligne': nom_ligne, 'min': minutes})
 
-        # Tri du plus rapide au plus lent
         prochains_bus.sort(key=lambda x: x['min'])
 
         if len(prochains_bus) > 0:
             premier = prochains_bus[0]
-            # Affiche ex: "95-48: 5m"
             texte = f"{premier['ligne']}: {premier['min']}m"
             icone = "i2766"
         else:
-            texte = "Aucun bus"
+            # Si le filtre marche mais qu'aucun 1242 n'est là
+            texte = "Pas de bus"
             icone = "a236"
 
         return jsonify({"frames": [{"text": texte, "icon": icone, "index": 0}]})
 
-    except Exception as e:
-        # En cas d'erreur technique
+    except Exception:
         return jsonify({"frames": [{"text": "Err", "icon": "i93", "index": 0}]})
 
 if __name__ == '__main__':
