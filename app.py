@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 # --- TES INFOS ---
-TRANSIT_API_KEY = "TA_CLE_API_TRANSIT"  # <-- COLLE TA CLÉ ICI
+TRANSIT_API_KEY = "e087cc4f40c2af72891794bfa9347d5def4315d02bd01b272f9559e2e90147d6"  # <-- COLLE TA CLÉ ICI
 STOP_ID = "STIVOFR:25614"               # L'ID que tu as trouvé (vers Préfecture)
 
 @app.route('/')
