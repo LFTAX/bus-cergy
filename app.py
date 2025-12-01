@@ -23,7 +23,7 @@ def get_bus_schedule():
     
     # --- FILTRE HORAIRE ---
     HEURE_DEBUT = 7
-    HEURE_FIN = 21 # Change à 23 juste pour tester ce soir si tu veux
+    HEURE_FIN = 9 # Change à 23 juste pour tester ce soir si tu veux
 
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
          return jsonify({"frames": [{"text": " ", "icon": "a236", "index": 0}]})
