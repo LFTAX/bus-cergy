@@ -25,7 +25,7 @@ def get_bus_schedule():
     # Réglé pour demain matin (7h00 - 9h00)
     # Si tu veux tester maintenant, mets HEURE_FIN = 23
     HEURE_DEBUT = 7
-    HEURE_FIN = 20 
+    HEURE_FIN = 9 
 
     # Hors horaires : écran vide pour dormir
     if not (HEURE_DEBUT <= now.hour < HEURE_FIN):
