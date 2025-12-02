@@ -54,8 +54,8 @@ def get_bus_schedule():
                         minutes = int(diff_seconds / 60)
                         
                         # --- LE FILTRE "MARCHE A PIED" ---
-                        # On ne garde que les bus qui sont à au moins 10 min
-                        if minutes >= 10:
+                        # On ne garde que les bus qui sont à au moins 5 min
+                        if minutes >= 5:
                             bus_trouves.append({'ligne': nom_ligne, 'min': minutes})
 
         # On trie pour afficher le prochain bus "prenable"
