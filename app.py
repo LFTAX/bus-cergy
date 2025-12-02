@@ -73,7 +73,7 @@ def get_bus_schedule():
                 # ÉCRAN A : Numéro (Fixe)
                 frames.append({
                     "text": bus['ligne'],
-                    "icon": "i2766", # Icône Bus
+                    "icon": "i19282", # Icône Bus
                     "index": idx
                 })
                 idx += 1
@@ -81,13 +81,13 @@ def get_bus_schedule():
                 # ÉCRAN B : Temps (Fixe)
                 frames.append({
                     "text": f"{bus['min']} min",
-                    "icon": "a236", # Icône Horloge
+                    "icon": "i19282", # Icône Horloge
                     "index": idx
                 })
                 idx += 1
         else:
             # Si aucun bus n'est > 5 min (ou s'il n'y en a pas du tout)
-            frames.append({"text": "Pas de bus", "icon": "a236", "index": 0})
+            frames.append({"text": "Pas de bus", "icon": "i19282", "index": 0})
 
         return jsonify({"frames": frames})
 
