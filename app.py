@@ -14,7 +14,7 @@ LIGNES_VOULUES = ["1242", "1224"]
 
 @app.route('/')
 def home():
-    return "Serveur Bus Optimisé (Filtre > 10min)"
+    return "Serveur LaMetric x Transit, horaire avec l'extension /bus-matin"
 
 @app.route('/bus-matin')
 def get_bus_schedule():
@@ -86,7 +86,7 @@ def get_bus_schedule():
                 })
                 idx += 1
         else:
-            # Si aucun bus n'est > 10 min (ou s'il n'y en a pas du tout)
+            # Si aucun bus n'est > 5 min (ou s'il n'y en a pas du tout)
             frames.append({"text": "Pas de bus", "icon": "a236", "index": 0})
 
         return jsonify({"frames": frames})
